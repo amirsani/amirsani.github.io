@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capital Introduction Market Simulation</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --background-color: #f8fafc;
+            --text-color: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+            --tag-bg: #f1f5f9;
+            --tag-text: #475569;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .contact-info {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .contact-info a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.2s ease;
+        }
+
+        .contact-info a:hover {
+            color: var(--primary-dark);
+        }
+
+        .contact-info svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .tags {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-start;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background-color: var(--tag-bg);
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            color: var(--tag-text);
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .description {
+            font-size: 1.125rem;
+            color: var(--text-light);
+            margin-bottom: 3rem;
+            max-width: 800px;
+        }
+
+        .simulation-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+        input, button {
+            font-family: inherit;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .background-section {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .background-button {
+            width: 100%;
+            text-align: left;
+            padding: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .background-button:hover {
+            background: var(--tag-bg);
+        }
+
+        .background-content {
+            display: none;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .experience {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .experience:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .experience h3 {
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .experience p {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .experience ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .experience li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .experience li::before {
+            content: "•";
+            color: var(--primary-color);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .publication {
+            margin-bottom: 2rem;
+        }
+
+        .publication-title {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .publication a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .publication a:hover {
+            text-decoration: underline;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+        }
+
+        .name {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 0 0 1rem 0;
+            line-height: 1.2;
+        }
+
+        .contact {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+
+        .contact a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .contact a:hover {
+            color: var(--primary-dark);
+        }
+
+        .contact .separator {
+            margin: 0 0.5rem;
+            color: var(--text-light);
+        }
+
+        .footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        #simulation-container {
+            margin: 0 auto;
+        }
+
+        #board {
+            width: 100%;
+            height: 600px;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+        }
+
+        .simulation-container button {
+            width: 80px;
+            height: 80px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            font-size: 1.2em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .simulation-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+            background: #1976D2;
+        }
+
+        .simulation-container button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(33, 150, 243, 0.3);
+        }
+
+        .simulation-container button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+        }
+
+        .simulation-container button:active::after {
+            animation: ripple 0.6s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 0.5;
+            }
+            100% {
+                width: 150px;
+                height: 150px;
+                opacity: 0;
+            }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .stat-card {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        .stat-card .title {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card div:not(.title) {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #2196F3;
+            text-shadow: 0 0 10px rgba(33, 150, 243, 0.3);
+        }
+
+        #median-return {
+            color: #4CAF50;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+        }
+
+        #top-quartile {
+            color: #FFC107;
+            text-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+        }
+
+        #total-investments {
+            color: #E91E63;
+            text-shadow: 0 0 10px rgba(233, 30, 99, 0.3);
+        }
+
+        .title {
+            font-size: 0.9em;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .contact-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .description {
+                font-size: 1rem;
+            }
+
+            .simulation-container {
+                padding: 1rem;
+            }
+
+            .name {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="name">Amir Sani, PhD</h1>
+        <div class="tags">
+            <span class="tag">Machine Learning</span>
+            <span class="tag">Complex Systems</span>
+            <span class="tag">Quantitative Finance</span>
+            <span class="tag">AI</span>
+        </div>
+        <header class="header">
+            <div class="contact-info">
+                <a href="mailto:reachme@amirsani.com">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    reachme@amirsani.com
+                </a>
+                <a href="https://www.linkedin.com/in/amirsani/" target="_blank" rel="noopener noreferrer">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                    </svg>
+                    LinkedIn
+                </a>
+            </div>
+        </header>
+
+        <div class="background-section">
+        </div>
+
+        <div class="simulation-container">
+            <div id="simulation-container">
+                <div id="board"></div>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="title">Median Return</div>
+                        <div id="median-return">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="title">Top Quartile</div>
+                        <div id="top-quartile">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="title">Total Investments</div>
+                        <div id="total-investments">0</div>
+                    </div>
+                </div>
+                <button onclick="dropBall()">Rain</button>
+            </div>
+        </div>
+
+        <div class="background-section">
+            <button class="background-button">
+                Background
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </button>
+            <div class="background-content">
+                <section>
+                    <h2 class="section-title">Professional Experience</h2>
+                    <div class="experience">
+                        <h3>AdapData</h3>
+                        <p><strong>Consultant - AI | Process Automation</strong><br>February 2024 - Present</p>
+                        <ul>
+                            <li>Specialized consulting focused on alternative data generation, signalling, and commercial value creation.</li>
+                            <li>Provide deep expertise in machine learning, complex systems modeling, and quantitative finance.</li>
+                            <li>Architect, deliver and maintain bespoke signaling systems for value creation as APIs.</li>
+                        </ul>
+                    </div>
+                    <div class="experience">
+                        <h3>Scuola Superiore Sant'Anna</h3>
+                        <p><strong>Professional Affiliate</strong><br>September 2022 - Present</p>
+                        <p><strong>External Research Fellow</strong><br>October 2017 - September 2022</p>
+                        <p><strong>Research Fellow</strong><br>June 2017 - October 2017</p>
+                        <ul>
+                            <li>Conducted research on agent-based model calibration using Machine Learning Surrogates.</li>
+                            <li>Focused on quantitative decision-making in macroeconomic modeling, complex systems, network modeling, and ESG impact assessment.</li>
+                        </ul>
+                    </div>
+                    <div class="experience">
+                        <h3>Techstars</h3>
+                        <p><strong>Senior Vice President of Fund & Investment Analytics</strong><br>September 2022 - February 2024</p>
+                        <ul>
+                            <li>Leveraged quantitative decision-making techniques and AI-driven analytics for fund follow-on and exit management strategy.</li>
+                            <li>Implemented data-driven processes to enhance investment thesis development, portfolio management, and value creation initiatives.</li>
+                            <li>Advised on data-driven initiatives and "alpha" generation across business lines.</li>
+                        </ul>
+                    </div>
+                    <div class="experience">
+                        <h3>EY</h3>
+                        <p><strong>Partner</strong><br>July 2022 - August 2022</p>
+                        <p><strong>Associate Partner</strong><br>March 2022 - June 2022</p>
+                        <ul>
+                            <li>Architected a UK-wide private equity intelligence platform built on alternative and proprietary data sources.</li>
+                            <li>Leveraged language modeling, NLP, and advanced data processing techniques for operational efficiency and strategic insights.</li>
+                        </ul>
+                    </div>
+                    <div class="experience">
+                        <h3>13books Capital</h3>
+                        <p><strong>Chief Technology Officer</strong><br>January 2020 - November 2021</p>
+                        <ul>
+                            <li>Developed and deployed machine learning models for sourcing, screening, benchmarking, and tracking fintech startups.</li>
+                            <li>Implemented data aggregation/cleaning/engineering ETL based on licensed and alternative sources.</li>
+                            <li>Designed recommender systems and conducted investor fund flow analysis and network modeling.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="section-title">Academic Background</h2>
+                    <p>Dr. Amir Sani completed his PhD in <a href="https://theses.hal.science/tel-01256178/file/AmirSani_Thesis.pdf">Machine Learning for Decision Making Under Uncertainty</a> under the supervision of <a href="http://researchers.lille.inria.fr/~munos/">Rémi Munos</a> and <a href="http://chercheurs.lille.inria.fr/~lazaric/Webpage/Home/Home.html">Alessandro Lazaric</a> as part of the <a href="https://sequel.lille.inria.fr/">SequeL</a> team at <a href="http://www.inria.fr/centre/lille">INRIA-Lille Nord Europe</a>.</p>
+                    
+                    <h3>Research Fellowships</h3>
+                    <ul>
+                        <li>With <a href="http://www.proba.jussieu.fr/pageperso/ramacont/">Rama Cont</a> at:
+                            <ul>
+                                <li>The <a href="http://www.ox.ac.uk/">University of Oxford</a>, <a href="https://www.maths.ox.ac.uk/">Mathematical Institute</a></li>
+                                <li>The <a href="https://www.imperial.ac.uk/quantitative-finance/">CFM-Imperial Institute of Quantitative Finance</a> in the <a href="https://www.imperial.ac.uk/mathematics">Department of Mathematics</a> at <a href="https://www.imperial.ac.uk/">Imperial College London</a></li>
+                            </ul>
+                        </li>
+                        <li>With <a href="https://www.santannapisa.it/it/andrea-roventini">Andrea Roventini</a> at the <a href="https://www.santannapisa.it/en/istituto/economia/istituto-di-economia">Institute of Economics</a> at <a href="https://www.santannapisa.it/it">Scuola Superiore Sant'Anna Pisa</a>, as a member of the <a href="http://ec.europa.eu/programmes/horizon2020/">EU Horizons 2020</a> <a href="http://ec.europa.eu/programmes/horizon2020/en/h2020-section/future-and-emerging-technologies">Future and Emerging Technologies</a> <a href="http://www.isigrowth.eu/">ISIGrowth</a> project</li>
+                        <li>With <a href="https://sites.google.com/site/antoinedavidmandel/">Antoine Mandel</a> at the <a href="http://centredeconomiesorbonne.univ-paris1.fr/">Centre d'Économie de la Sorbonne</a> in <a href="https://www.univ-paris1.fr/">Université Paris 1, Panthéon-Sorbonne</a>, as a member of the <a href="http://ec.europa.eu/programmes/horizon2020/">EU Horizons 2020</a> <a href="http://ec.europa.eu/programmes/horizon2020/en/h2020-section/future-and-emerging-technologies">Future and Emerging Technologies</a> <a href="http://www.dolfinsproject.eu/">DOLFINS</a> project</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="section-title">Publications</h2>
+                    <div class="publication">
+                        <p class="publication-title"><a href="https://www.sciencedirect.com/science/article/pii/S0165188918301088">Agent-Based Model Calibration using Machine Learning Surrogates</a></p>
+                        <p>With <a href="https://ideas.repec.org/f/pla770.html">Francesco Lamperti</a> and <a href="https://www.santannapisa.it/en/personale/andrea-roventini">Andrea Roventini</a>, Journal of Economic Dynamics and Control</p>
+                        <p><a href="https://github.com/amirsani/online_surrogate_modeling/blob/master/Example.ipynb">Simple Batch Example in Python</a></p>
+                    </div>
+                    <div class="publication">
+                        <p class="publication-title"><a href="https://hal.archives-ouvertes.fr/hal-01144547/">The Replacement Bootstrap for Dependent Data</a></p>
+                        <p>With <a href="http://chercheurs.lille.inria.fr/~lazaric/Webpage/Home/Home.html">Alessandro Lazaric</a> and <a href="http://daniil.ryabko.net/">Daniil Ryabko</a>, ISIT 2015</p>
+                        <p><a href="https://github.com/amirsani/replacementbootstrap">C implementation</a>, <a href="https://github.com/amirsani/rboot_python">Python implementation</a></p>
+                    </div>
+                    <div class="publication">
+                        <p class="publication-title"><a href="http://papers.nips.cc/paper/5436-an-accelerated-proximal-coordinate-gradient-method.pdf">Exploiting easy data in online optimization</a></p>
+                        <p>With <a href="http://cs.bme.hu/~gergo/">Gergely Neu</a> and <a href="http://chercheurs.lille.inria.fr/~lazaric/Webpage/Home/Home.html">Alessandro Lazaric</a>, NIPS 2014</p>
+                    </div>
+                    <div class="publication">
+                        <p class="publication-title"><a href="http://scholar.google.fr/citations?view_op=view_citation&hl=en&user=9WT9rMYAAAAJ&citation_for_view=9WT9rMYAAAAJ:u5HHmVD_uO8C">Risk-aversion in multi-armed bandits</a></p>
+                        <p>With <a href="http://chercheurs.lille.inria.fr/~lazaric/Webpage/Home/Home.html">Alessandro Lazaric</a> and <a href="http://researchers.lille.inria.fr/~munos/">Rémi Munos</a>, NIPS 2012</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="section-title">Education</h2>
+                    <ul>
+                        <li><strong>INRIA & University of Lille 1</strong><br>Doctor of Philosophy (Ph.D.), Machine Learning (2011 - 2015)</li>
+                        <li><strong>University College London, U. of London</strong><br>MSc, Machine Learning (2010 - 2011)</li>
+                        <li><strong>The Australian National University</strong><br>MSc, Information Technology (2009 - 2010)</li>
+                        <li><strong>University of San Diego School of Law</strong><br>Certificate, Law (2005)</li>
+                        <li><strong>University of California, San Diego</strong><br>BA, Philosophy (1997 - 2001)</li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        &copy; 2024 Amir Sani. All rights reserved.
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const button = document.querySelector('.background-button');
+            const content = document.querySelector('.background-content');
+            const arrow = button.querySelector('svg');
+            
+            button.addEventListener('click', function() {
+                const isVisible = content.style.display === 'block';
+                content.style.display = isVisible ? 'none' : 'block';
+                arrow.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(180deg)';
+            });
+        });
+    </script>
+
+    <script>
+        const width = document.getElementById('board').clientWidth;
+        const height = 600;
+        const pinRadius = 4;
+        const ballRadius = 6;
+        const rows = 12;
+        const bins = rows + 1;
+        
+        let returns = new Array(bins).fill(0);
+        let totalBalls = 0;
+
+        // Set up the SVG
+        const svg = d3.select('#board')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height);
+
+        // Calculate positions with slight bias to right (power law)
+        const xScale = d3.scaleLinear()
+            .domain([0, rows])
+            .range([width * 0.2, width * 0.8]);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, rows + 1])
+            .range([50, height - 50]);
+
+        // Draw pins with slight rightward bias positions
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col <= row; col++) {
+                const x = xScale(row/2 + col) + (row * 0.5); // Slight rightward shift
+                const y = yScale(row);
+                
+                svg.append('circle')
+                    .attr('cx', x)
+                    .attr('cy', y)
+                    .attr('r', pinRadius)
+                    .attr('fill', '#666');
+            }
+        }
+
+        // Draw bins
+        const binWidth = (xScale(rows) - xScale(0)) / bins;
+        for (let i = 0; i <= bins; i++) {
+            const x = xScale(0) + i * binWidth;
+            
+            svg.append('line')
+                .attr('x1', x)
+                .attr('y1', yScale(rows))
+                .attr('x2', x)
+                .attr('y2', height - 20)
+                .attr('stroke', '#333')
+                .attr('stroke-width', 1);
+        }
+
+        // Power law distributed IRR values
+        const irrValues = Array.from({length: bins}, (_, i) => {
+            // Transform linear position to power law
+            const t = i / (bins - 1);
+            const power = 3; // Adjust for power law steepness
+            
+            // Map to realistic IRR range: -25% to +50% with rare outliers up to +100%
+            if (t < 0.1) { // Bottom 10%
+                return -25 + t * 100; // Loss territory
+            } else if (t < 0.7) { // Middle 60%
+                return 5 + Math.pow(t, power) * 20; // Moderate returns
+            } else { // Top 30%
+                return 15 + Math.pow(t, power) * 85; // High performers
+            }
+        });
+
+        function dropBall() {
+            let x = width/2;
+            let y = 20;
+            let path = [];
+            let row = 0;
+            
+            const ball = svg.append('circle')
+                .attr('cx', x)
+                .attr('cy', y)
+                .attr('r', ballRadius)
+                .attr('fill', '#4CAF50');
+
+            function animate() {
+                if (row <= rows) {
+                    // Power law biased random choice
+                    if (y >= yScale(row) - ballRadius) {
+                        const rightBias = Math.pow(Math.random(), 1.5); // Bias towards right (higher returns)
+                        const direction = rightBias < 0.5 ? -1 : 1;
+                        x += direction * (binWidth/2);
+                        path.push(direction);
+                        row++;
+                    }
+                    
+                    y += 2;
+                    ball.attr('cx', x)
+                        .attr('cy', y);
+
+                    requestAnimationFrame(animate);
+                } else {
+                    // Ball reached bottom
+                    const binIndex = path.reduce((acc, val) => acc + (val === 1 ? 1 : 0), 0);
+                    returns[binIndex]++;
+                    totalBalls++;
+                    
+                    // Update statistics
+                    const sortedReturns = returns.map((count, idx) => 
+                        Array(count).fill(irrValues[idx])).flat().sort((a, b) => a - b);
+                    
+                    const medianReturn = sortedReturns[Math.floor(sortedReturns.length/2)] || 0;
+                    const topQuartileIndex = Math.floor(sortedReturns.length * 0.75);
+                    const topQuartile = sortedReturns[topQuartileIndex] || 0;
+
+                    document.getElementById('median-return').textContent = 
+                        `${medianReturn.toFixed(1)}%`;
+                    document.getElementById('top-quartile').textContent = 
+                        `${topQuartile.toFixed(1)}%`;
+                    document.getElementById('total-investments').textContent = 
+                        totalBalls;
+
+                    // Show distribution
+                    const maxCount = Math.max(...returns);
+                    const heightScale = d3.scaleLinear()
+                        .domain([0, maxCount])
+                        .range([0, 100]);
+
+                    svg.selectAll('.distribution')
+                        .data(returns)
+                        .join('rect')
+                        .attr('class', 'distribution')
+                        .attr('x', (d, i) => xScale(0) + i * binWidth)
+                        .attr('y', d => height - 20 - heightScale(d))
+                        .attr('width', binWidth - 1)
+                        .attr('height', d => heightScale(d))
+                        .attr('fill', (d, i) => {
+                            const irr = irrValues[i];
+                            return irr < 0 ? '#ff4444' : 
+                                   irr < 15 ? '#ffaa00' : 
+                                   irr < 30 ? '#2ecc71' : '#27ae60';
+                        })
+                        .attr('opacity', 0.6);
+
+                    // Add IRR labels
+                    svg.selectAll('.irr-label')
+                        .data(irrValues)
+                        .join('text')
+                        .attr('class', 'irr-label')
+                        .attr('x', (d, i) => xScale(0) + i * binWidth + binWidth/2)
+                        .attr('y', height - 5)
+                        .attr('text-anchor', 'middle')
+                        .attr('fill', '#888')
+                        .attr('font-size', '10px')
+                        .text(d => `${d.toFixed(1)}%`);
+
+                    // Fade out ball
+                    ball.transition()
+                        .duration(500)
+                        .attr('opacity', 0)
+                        .remove();
+                }
+            }
+
+            animate();
+        }
+    </script>
+</body>
+</html>
