@@ -10,7 +10,7 @@ function ReturnSimulation() {
   const dampening = 0.6;
   const histogramHeight = 150;
 
-  const binWidths = [0.22, 0.23, 0.25, 0.21, 0.09];
+  const binWidths = [0.45, 0.25, 0.20, 0.07, 0.03];
   const binLabels = ['<1x', '1x-2x', '2x-5x', '5x-10x', '>10x'];
   const binColors = ['#ff4444', '#ffaa00', '#2ecc71', '#27ae60', '#145a32'];
 
